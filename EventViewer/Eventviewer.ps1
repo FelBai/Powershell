@@ -81,11 +81,17 @@ foreach ($Event in $ExcludeApplicationEvents) {
 
 
 #Get SystemEventlogs
-$SystemEventLogs = Get-EventLog -LogName system -EntryType Error -After (Get-Date).AddDays(-7) | where eventid -NotIn $AarrayExcludeSystemEvents.eventid | select TimeGenerated, Entrytype, Source, EventID,Message |Sort-Object -Property TimeGenerated
+$SystemEventLogs = Get-EventLog -LogName system -EntryType Error -After (Get-Date).AddDays(-7) | 
+where eventid -NotIn $AarrayExcludeSystemEvents.eventid | 
+select TimeGenerated, Entrytype, Source, EventID,Message |
+Sort-Object -Property TimeGenerated 
 
 
 #Get Applicationslogs
-$ApplicationEventlogs = Get-EventLog -LogName application -EntryType Error -After (Get-Date).AddDays(-7) | where eventid -NotIn $AarrayExcludeApplicationEvents.eventid | select TimeGenerated, Entrytype, Source, EventID,Message |Sort-Object -Property TimeGenerated
+$ApplicationEventlogs = Get-EventLog -LogName application -EntryType Error -After (Get-Date).AddDays(-7) | 
+where eventid -NotIn $AarrayExcludeApplicationEvents.eventid | 
+select TimeGenerated, Entrytype, Source, EventID,Message |
+Sort-Object -Property TimeGenerated
 
 
 #Build Datagrid 
