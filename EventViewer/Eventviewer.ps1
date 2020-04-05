@@ -2,7 +2,6 @@
 Add-Type -AssemblyName PresentationFramework
 
 
-
 #XAML form designed using Vistual Studio
 [xml]$Form = @"
 <Window 
@@ -14,6 +13,7 @@ Add-Type -AssemblyName PresentationFramework
                         <Grid Background="#FFE5E5E5">
                             <DataGrid Name="SystemDataGrid" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" SelectionMode="Single" />
                             <Button Name="ExportSystem" Content="Add to Exclude List" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" Width="126" RenderTransformOrigin="2,1.227"/>
+                            
                             <TextBox Name="KommentarBox" HorizontalAlignment="Left" Height="20" Margin="150,20,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="201" />
                             <Label Name="Kommentar" Content="Kommentar:" HorizontalAlignment="Left" Margin="150,0,0,0" VerticalAlignment="Top" Height="30" Width="110"/>
                            
@@ -22,7 +22,8 @@ Add-Type -AssemblyName PresentationFramework
                        
                       </Grid>
                     </TabItem>
-
+                    
+                    <!--Application in progress -->
                     <TabItem Header="Application Logs">
                         <Grid Background="#FFE5E5E5">
                             <DataGrid Name="ApplicationDataGrid" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" SelectionMode="Single" />
@@ -38,8 +39,6 @@ Add-Type -AssemblyName PresentationFramework
 
 
 
-
-
 #Create a form
 $XMLReader = (New-Object System.Xml.XmlNodeReader $Form)
 $XMLForm = [Windows.Markup.XamlReader]::Load($XMLReader)
@@ -52,96 +51,80 @@ $ExportApplication = $XMLForm.FindName('ExportApplication')
 $KommentarBox = $XMLForm.FindName('KommentarBox')
 $ApprovedFromBox = $XMLForm.FindName('ApprovedFromBox')
 
-
-
 #Create array object for Result DataGrid
-$SystemEventLogs  = New-Object System.Collections.ArrayList
-$ApplicationEventlogs =New-Object System.Collections.ArrayList
+$SystemEventLogs = New-Object System.Collections.ArrayList
+$ApplicationEventlogs = New-Object System.Collections.ArrayList
 
-
-# Filter SystemLogs             
+#Filter SystemLogs             
 $ExcludeSystemEvents = ""
 $ExcludeSystemEvents = Import-Csv .\ExcludedSystemLogs.csv 
 
-
 $AarrayExcludeSystemEvents = @()
 foreach ($Event in $ExcludeSystemEvents ) {
-$PSpObject = New-Object psobject -Property @{
-Eventid    =    $event.eventid }
-$AarrayExcludeSystemEvents += $PSpObject
+    $PSpObject = New-Object psobject -Property @{
+        Eventid = $event.eventid 
+    }
+    $AarrayExcludeSystemEvents += $PSpObject
 }
-Write-Host zu filtern  $AarrayExcludeSystemEvents.eventid
 
-
-
-# Filter ApplicationLogs             
-
+#Filter ApplicationLogs             
 $ExcludeApplicationEvents = ""
 $ExcludeApplicationEvents = Import-Csv .\ExcludedApplicationLogs.csv 
 
-
 $AarrayExcludeApplicationEvents = @()
 foreach ($Event in $ExcludeApplicationEvents) {
-$PSpObject = New-Object psobject -Property @{
-Eventid    =    $event.eventid }
-$AarrayExcludeApplicationEvents += $PSpObject
+    $PSpObject = New-Object psobject -Property @{
+        Eventid = $event.eventid 
+    }
+    $AarrayExcludeApplicationEvents += $PSpObject
 }
-#$AarrayExcludeApplicationEvents.eventid
-
-
 
 
 #Get SystemEventlogs
-$SystemEventLogs= Get-EventLog -LogName system -EntryType Error -After (Get-Date).AddDays(-7) |where eventid -NotIn $AarrayExcludeSystemEvents.eventid 
-write-host Ausgabe Evenid nach Filter $SystemEventLogs.eventid
+$SystemEventLogs = Get-EventLog -LogName system -EntryType Error -After (Get-Date).AddDays(-7) | where eventid -NotIn $AarrayExcludeSystemEvents.eventid | select TimeGenerated, Entrytype, Source, EventID,Message |Sort-Object -Property TimeGenerated
+
 
 #Get Applicationslogs
-$ApplicationEventlogs= Get-EventLog -LogName application -EntryType Error -After (Get-Date).AddDays(-7) |where eventid -NotIn $AarrayExcludeApplicationEvents.eventid
+$ApplicationEventlogs = Get-EventLog -LogName application -EntryType Error -After (Get-Date).AddDays(-7) | where eventid -NotIn $AarrayExcludeApplicationEvents.eventid | select TimeGenerated, Entrytype, Source, EventID,Message |Sort-Object -Property TimeGenerated
 
 
 #Build Datagrid 
-$SystemDataGrid.ItemsSource=@($SystemEventLogs)
-$ApplicationDataGrid.ItemsSource=@($ApplicationEventlogs)
+$SystemDataGrid.ItemsSource = @($SystemEventLogs)
+$ApplicationDataGrid.ItemsSource = @($ApplicationEventlogs)
+
+
+#Button ExportSystem Action
+$ExportSystem.add_click( {
+        if ( ($ApprovedFromBox.text -eq '') -or ($KommentarBox.text -eq '') ) {
+            [System.Windows.MessageBox]::Show("Kommentar: und Approved From: Eintragen")
+        }
+
+
+        else {
+            $SelectedRow = $SystemDataGrid.SelectedItem
+                        
+            if ( $SelectedRow -eq $null) {
+                [System.Windows.MessageBox]::Show("Kein Event ausgewählt")
+            }
+
+            else {
+                $ExportCsv = $SelectedRow
+                $ExportCsv | Add-Member -NotePropertyName Kommentar -NotePropertyValue $KommentarBox.text
+                $ExportCsv | Add-Member -NotePropertyName ApprovedFrom -NotePropertyValue $ApprovedFromBox.text
+                $ExportCsv | Export-Csv .\ExcludedSystemLogs.csv  -NoTypeInformation -Append
+            
+            }
+        }
+    })
+
+#Button ExportSystem Action
+$ExportApplication.add_click( {
         
-   
-
-# Button ExportSystem Action
-$ExportApplication.add_click({
+        $known = $ApplicationDataGrid.SelectedItem
+        $known | Add-Member -NotePropertyName Kommentar -NotePropertyValue $KommentarBox.text
+        $known | Export-Csv .\ExcludedApplicationLogs.csv -NoTypeInformation -Append
         
-          $known = $ApplicationDataGrid.SelectedItem
-          $known |  Add-Member -NotePropertyName Kommentar -NotePropertyValue $KommentarBox.text
-          #Write-hos $known
-          $known  |Export-Csv .\ExcludedApplicationLogs.csv -NoTypeInformation -Append
-          write-host $KommentarBox.text    
-        
-})
-
-
-# Button ExportSystem Action
-$ExportSystem.add_click({
-          if ( ($ApprovedFromBox.text  -eq '') -or ($KommentarBox.text  -eq '') ) {
-          [System.Windows.MessageBox]::Show("Kommentar: und Approved From: Eintragen")
-          }
-
-
-          else {
-          
-                   
-          $known = $SystemDataGrid.SelectedItem
-          write-host ausgewähltes item $SystemDataGrid.SelectedItem 
-          if ( $Known -eq $null) {
-          [System.Windows.MessageBox]::Show("Kein Event ausgewählt")
-          }
-          else {
-          $known |  Add-Member -NotePropertyName Kommentar -NotePropertyValue $KommentarBox.text
-          $known |  Add-Member -NotePropertyName ApprovedFrom -NotePropertyValue $ApprovedFromBox.text
-          #Write-hos $known
-          $known  |Export-Csv .\ExcludedSystemLogs.csv  -NoTypeInformation -Append
-         
-          }
-          }
-})
-
+    })
 
 
 #Show XMLform
