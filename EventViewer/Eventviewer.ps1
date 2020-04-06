@@ -6,12 +6,48 @@ Add-Type -AssemblyName PresentationFramework
 [xml]$Form = @"
 <Window 
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Eventlogs" Height="1000" Width="1200" ResizeMode="CanResize">
     <Grid>
                <TabControl>
                     <TabItem Header="System Logs">
                         <Grid Background="#FFE5E5E5">
-                            <DataGrid Name="SystemDataGrid" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" SelectionMode="Single" />
+                            <DataGrid Name="SystemDataGrid" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" SelectionMode="Single">
+                            
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="{x:Type DataGridCell}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding EntryType}" Value="error">
+                                                <Setter Property="Background" Value="#F3E0E0" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding EntryType}" Value="warning">
+                                                <Setter Property="Background" Value="#FFFFF0" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.CellStyle>
+
+
+                            <DataGrid.Columns>                
+                           
+                            <DataGridTextColumn Header="TimeGenerated" Binding="{Binding TimeGenerated, StringFormat=\{0:dd.MM.yy HH:mm:ss\} }"/>                                                
+                            
+                           
+                            <DataGridTextColumn Binding="{Binding Test}">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="TextWrapping" Value="wrap"/>
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                            </DataGridTextColumn>
+                         
+                            
+                            
+                            
+                            </DataGrid.Columns>
+
+
+                            </DataGrid>
                             <Button Name="ExportSystem" Content="Add to Exclude List" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" Width="126" RenderTransformOrigin="2,1.227"/>
                             
                             <TextBox Name="KommentarBox" HorizontalAlignment="Left" Height="20" Margin="150,20,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="201" />
@@ -81,16 +117,16 @@ foreach ($Event in $ExcludeApplicationEvents) {
 
 
 #Get SystemEventlogs
-$SystemEventLogs = Get-EventLog -LogName system -EntryType Error -After (Get-Date).AddDays(-7) | 
+$SystemEventLogs = Get-EventLog -LogName system -EntryType Error, warning -After (Get-Date).AddDays(-7) | 
 where eventid -NotIn $AarrayExcludeSystemEvents.eventid | 
-select TimeGenerated, Entrytype, Source, EventID,Message |
+select TimeGenerated, Entrytype, Source, EventID, Message |
 Sort-Object -Property TimeGenerated 
 
 
 #Get Applicationslogs
-$ApplicationEventlogs = Get-EventLog -LogName application -EntryType Error -After (Get-Date).AddDays(-7) | 
+$ApplicationEventlogs = Get-EventLog -LogName application -EntryType Error, warning -After (Get-Date).AddDays(-7) | 
 where eventid -NotIn $AarrayExcludeApplicationEvents.eventid | 
-select TimeGenerated, Entrytype, Source, EventID,Message |
+select TimeGenerated, Entrytype, Source, EventID, Message |
 Sort-Object -Property TimeGenerated
 
 
