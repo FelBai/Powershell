@@ -4,7 +4,7 @@
         <TabControl>
             <TabItem Header="System Logs">
                 <Grid Background="#FFE5E5E5">
-                    <DataGrid Name="SystemDataGrid" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" SelectionMode="Single" AutoGenerateColumns="False" IsReadOnly="True" Width="816">
+                    <DataGrid Name="SystemDataGrid" HorizontalAlignment="Left" Margin="10,79,0,0" VerticalAlignment="Top" SelectionMode="Single" AutoGenerateColumns="False" IsReadOnly="True" Width="689">
                         <DataGrid.ContextMenu>
                             <!-- Add Copy Option -->
                             <ContextMenu>
@@ -62,27 +62,26 @@
 
 
                     </DataGrid>
-                    <Button Name="ExportSystem" Content="Add to Exclude List" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" Width="126" RenderTransformOrigin="2,1.227" />
+                    <Button Name="ExportSystem" Content="Add to Exclude List" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Width="126" RenderTransformOrigin="2,1.227" />
                     <TextBox Height="582" Width="644" FontSize="14" Name="Message" HorizontalAlignment="Left" Margin="870,60,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="{Binding ElementName=SystemDataGrid, Path=SelectedItem.Message}" />
 
-                    <TextBox Name="KommentarBox" HorizontalAlignment="Left" Height="20" Margin="150,20,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="201" />
-                    <Label Name="Kommentar" Content="Kommentar:" HorizontalAlignment="Left" Margin="145,-3,0,0" VerticalAlignment="Top" Height="30" Width="110" RenderTransformOrigin="0.6,0.119" />
+                    <TextBox Name="KommentarBox" HorizontalAlignment="Left" Height="20" Margin="150,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="201" />
+                    <Label Name="Kommentar" Content="Kommentar:" HorizontalAlignment="Left" Margin="145,17,0,0" VerticalAlignment="Top" Height="30" Width="110" RenderTransformOrigin="0.6,0.119" />
 
-                    <TextBox Name="ApprovedFromBox" HorizontalAlignment="Left" Height="20" Margin="379,20,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="201" />
-                    <Label Name="ApprovedFrom" Content="Approved From:" HorizontalAlignment="Left" Margin="373,-3,0,0" VerticalAlignment="Top" Height="30" Width="110" />
+                    <TextBox Name="ApprovedFromBox" HorizontalAlignment="Left" Height="20" Margin="379,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="201" />
+                    <Label Name="ApprovedFrom" Content="Approved From:" HorizontalAlignment="Left" Margin="373,17,0,0" VerticalAlignment="Top" Height="30" Width="110" />
+                    <Button Name="ShowSystemFilter" Content="Show Filter" HorizontalAlignment="Left" Margin="10,9,0,0" VerticalAlignment="Top" Width="126"/>
 
                 </Grid>
             </TabItem>
 
             <!--Application in progress -->
             <TabItem Header="Application Logs">
-                <Grid Background="#FFE5E5E5">
-                    <DataGrid Name="ApplicationDataGrid" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" SelectionMode="Single" />
-                    <Button Name="ExportApplication" Content="Add to Exclude List" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="126" RenderTransformOrigin="2,1.227" />
-                </Grid>
+
             </TabItem>
 
         </TabControl>
 
     </Grid>
 </Window>
+    

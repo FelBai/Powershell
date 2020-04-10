@@ -13,15 +13,16 @@ $XMLForm = [Windows.Markup.XamlReader]::Load($XMLReader)
 
 #Load Controls
 $SystemDataGrid = $XMLForm.FindName('SystemDataGrid')
-$ApplicationDataGrid = $XMLForm.FindName('ApplicationDataGrid')
 $ExportSystem = $XMLForm.FindName('ExportSystem')
-$ExportApplication = $XMLForm.FindName('ExportApplication')
 $KommentarBox = $XMLForm.FindName('KommentarBox')
 $ApprovedFromBox = $XMLForm.FindName('ApprovedFromBox')
+$ShowSystemFilter = $XMLForm.FindName('ShowSystemFilter')
+
+
 
 #Create array object for Result DataGrid
 $SystemEventLogs = New-Object System.Collections.ArrayList
-$ApplicationEventlogs = New-Object System.Collections.ArrayList
+
 
 #Filter SystemLogs             
 $ExcludeSystemEvents = ""
@@ -35,17 +36,6 @@ foreach ($Event in $ExcludeSystemEvents ) {
     $AarrayExcludeSystemEvents += $PSpObject
 }
 
-#Filter ApplicationLogs             
-$ExcludeApplicationEvents = ""
-$ExcludeApplicationEvents = Import-Csv .\ExcludedApplicationLogs.csv 
-
-$AarrayExcludeApplicationEvents = @()
-foreach ($Event in $ExcludeApplicationEvents) {
-    $PSpObject = New-Object psobject -Property @{
-        Eventid = $event.eventid 
-    }
-    $AarrayExcludeApplicationEvents += $PSpObject
-}
 
 
 #Get SystemEventlogs
@@ -55,16 +45,8 @@ select TimeGenerated, Entrytype, Source, EventID, Message |
 Sort-Object -Property TimeGenerated 
 
 
-#Get Applicationslogs
-$ApplicationEventlogs = Get-EventLog -LogName application -EntryType Error, warning -After (Get-Date).AddDays(-7) | 
-where eventid -NotIn $AarrayExcludeApplicationEvents.eventid | 
-select TimeGenerated, Entrytype, Source, EventID, Message |
-Sort-Object -Property TimeGenerated
-
-
 #Build Datagrid 
 $SystemDataGrid.ItemsSource = @($SystemEventLogs)
-$ApplicationDataGrid.ItemsSource = @($ApplicationEventlogs)
 
 
 #Button ExportSystem Action
@@ -90,15 +72,18 @@ $ExportSystem.add_click( {
             }
         }
     })
+    $AarrayExcludeSystemEvents.count
 
-#Button ExportSystem Action
-$ExportApplication.add_click( {
-        
-        $known = $ApplicationDataGrid.SelectedItem
-        $known | Add-Member -NotePropertyName Kommentar -NotePropertyValue $KommentarBox.text
-        $known | Export-Csv .\ExcludedApplicationLogs.csv -NoTypeInformation -Append
-        
-    })
+$ShowSystemFilter.add_click({
+    if ( $ExcludeSystemEvents.count -eq 0 ) {
+        [System.Windows.MessageBox]::Show("Filter is Empty")
+    }
+
+    else {
+        $ExcludeSystemEvents  | Out-GridView
+    }
+})
+
 
 
 #Show XMLform
