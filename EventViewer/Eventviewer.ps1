@@ -68,11 +68,15 @@ $ExportSystem.add_click( {
                 $ExportCsv | Add-Member -NotePropertyName Kommentar -NotePropertyValue $KommentarBox.text
                 $ExportCsv | Add-Member -NotePropertyName ApprovedFrom -NotePropertyValue $ApprovedFromBox.text
                 $ExportCsv | Export-Csv .\ExcludedSystemLogs.csv  -NoTypeInformation -Append
-            
+                $KommentarBox.clear()
+                $ApprovedFromBox.clear()
+                $EventID = $ExportCsv.EventID
+                $Message = $ExportCsv.Message
+                [System.Windows.MessageBox]::Show("EventID: $Eventid was added`n`nMesssag:`n $message")
             }
         }
     })
-    $AarrayExcludeSystemEvents.count
+   
 
 $ShowSystemFilter.add_click({
     if ( $ExcludeSystemEvents.count -eq 0 ) {
