@@ -17,11 +17,16 @@ $ExportSystem = $XMLForm.FindName('ExportSystem')
 $KommentarBox = $XMLForm.FindName('KommentarBox')
 $ApprovedFromBox = $XMLForm.FindName('ApprovedFromBox')
 $ShowSystemFilter = $XMLForm.FindName('ShowSystemFilter')
-
+$Name =  $XMLForm.FindName('Name')
 
 
 #Create array object for Result DataGrid
 $SystemEventLogs = New-Object System.Collections.ArrayList
+
+
+
+
+
 
 
 #Filter SystemLogs             
@@ -45,8 +50,19 @@ select TimeGenerated, Entrytype, Source, EventID, Message |
 Sort-Object -Property TimeGenerated 
 
 
+
+$lview = [System.Windows.Data.ListCollectionView]$SystemEventLogs
+$lview.GroupDescriptions.Add((new-object System.Windows.Data.PropertyGroupDescription "EventID"))
+$SystemDataGrid.ItemsSource = $lview
+
+
+
+
 #Build Datagrid 
-$SystemDataGrid.ItemsSource = @($SystemEventLogs)
+#$SystemDataGrid.ItemsSource = @($SystemEventLogs)
+
+
+
 
 
 #Button ExportSystem Action
