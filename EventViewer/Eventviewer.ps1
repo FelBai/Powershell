@@ -18,7 +18,7 @@ $KommentarBox = $XMLForm.FindName('KommentarBox')
 $ApprovedFromBox = $XMLForm.FindName('ApprovedFromBox')
 $ShowSystemFilter = $XMLForm.FindName('ShowSystemFilter')
 $Name =  $XMLForm.FindName('Name')
-
+$groups = $XMLForm.FindName('Groups')
 
 #Create array object for Result DataGrid
 $SystemEventLogs = New-Object System.Collections.ArrayList
@@ -54,9 +54,7 @@ Sort-Object -Property TimeGenerated
 $lview = [System.Windows.Data.ListCollectionView]$SystemEventLogs
 $lview.GroupDescriptions.Add((new-object System.Windows.Data.PropertyGroupDescription "EventID"))
 $SystemDataGrid.ItemsSource = $lview
-
-
-
+$lview.GroupDescriptions.clear()
 
 #Build Datagrid 
 #$SystemDataGrid.ItemsSource = @($SystemEventLogs)
@@ -105,7 +103,23 @@ $ShowSystemFilter.add_click({
 })
 
 
+$Groups.Add_Checked({
 
+   
+    $lview.GroupDescriptions.Add((new-object System.Windows.Data.PropertyGroupDescription "EventID"))
+       
+
+#$lview.GroupDescriptions.Add((new-object System.Windows.Data.PropertyGroupDescription "EventID"))
+})
+
+
+$Groups.Add_UnChecked({
+    $lview.GroupDescriptions.clear()
+    })
+    
+
+    
+    
 #Show XMLform
 $XMLForm.ShowDialog()
 
